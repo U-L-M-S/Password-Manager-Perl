@@ -1,2 +1,2 @@
 # Password-Manager-Perl-
-Yep. Another password Manager. But this time in Perl
+Yep. Another Password Manager. But this time in Perl
