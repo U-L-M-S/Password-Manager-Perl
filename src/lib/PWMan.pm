@@ -38,3 +38,39 @@ sub new($class, $vaultName, $secret="SuperTemporatySecret-123"){
   return bless $result, $class;
 
 }
+
+sub cipher($self) {
+	return $self->{ cipher };
+}
+
+sub getLoginByName ( $self, $which ) {
+	return $self->{ data }->{ $which };
+}
+
+sub getLoginsByHost ( $self, $which ) {
+
+	#sort { $a <=> $b } @numberArray;
+	#sort { $a cmp $b } @stringArray;
+
+	return sort { $a->{ 'name' } cmp $b->{ 'name' } }
+	  grep {
+		$_->{ 'url' } &&    # URL gibts auf dem Eintrag
+		  $_->{ 'url' } eq $which    ## und entspricht dem gesuchten
+	  } values( $self->{ data }->%* );
+}
+
+# Add an entry to the "database"
+# should return true on success
+sub addEntry ( $self, %params ) {
+	my $paramsRef = \%params;
+	my $name = $params{ 'name' };
+	return undef if ( $self->getLoginByName( $name ) );
+
+	# Create a new entry object
+	my $new_entry = PWMan::Entry->new( $paramsRef, $self->cipher );
+
+	# Add the new entry to the database
+	$self->{ data }->{ $new_entry->name } = $new_entry;
+
+	return $new_entry;
+}
