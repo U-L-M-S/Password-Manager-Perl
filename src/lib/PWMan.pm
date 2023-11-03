@@ -15,5 +15,26 @@ sub new($class, $vaultName, $secret="SuperTemporatySecret-123"){
 		-iv     => '1234567890987654',
 		-pbkdf  => 'pbkdf2',
 	);
+	my $result    = {
+		vaultFile => $jsonFile,
+		data      => {},
+		cipher    => $cipher,
+	};
+
+  	# Allow either strings or Mojo::File objects as parameter
+	if ( -f $jsonFile ) {
+		my $jsontext = $jsonFile->slurp;
+		my $jsondata = $jsxs->decode( $jsontext );
+
+		foreach my $passwordName ( keys $jsondata->%* ) {
+			my $passwordData = $jsondata->{ $passwordName };
+			$passwordData->{ name } = $passwordName;
+
+			my $entry = PWMan::Entry->fromJson( $passwordData, $cipher );
+			$result->{ data }->{ $passwordName } = $entry;
+		}
+	}
+
+  return bless $result, $class;
 
 }
